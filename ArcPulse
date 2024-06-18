@@ -1,0 +1,86 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arc Pulse Image Selector</title>
+    <style>
+        #product-image {
+            width: 300px;
+            height: 300px;
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select Product Color and Phone Color</h1>
+    <label for="product-color">Product Color:</label>
+    <select id="product-color">
+        <option value="matte_black">Matte Black</option>
+        <option value="mirror_polish_silver">Mirror Polish Silver</option>
+        <option value="titan_gray">Titan Gray</option>
+        <option value="aurora_blue">Aurora Blue</option>
+        <option value="mirror_polish_gold">Mirror Polish Gold</option>
+    </select>
+
+    <label for="phone-color">Phone Color:</label>
+    <select id="phone-color">
+        <option value="black">Black</option>
+        <option value="white">White</option>
+        <option value="blue">Blue</option>
+        <option value="gold">Gold</option>
+    </select>
+
+    <div>
+        <img id="product-image" src="https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_black_black.jpg?v=1234567890" alt="Product Image">
+    </div>
+
+    <script>
+        const productColorSelect = document.getElementById('product-color');
+        const phoneColorSelect = document.getElementById('phone-color');
+        const productImage = document.getElementById('product-image');
+
+        const imageUrls = {
+            matte_black: {
+                black: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_black_black.jpg?v=1234567890",
+                white: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_black_white.jpg?v=1234567890",
+                blue: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_black_blue.jpg?v=1234567890",
+                gold: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_black_gold.jpg?v=1234567890"
+            },
+            mirror_polish_silver: {
+                black: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_silver_black.jpg?v=1234567890",
+                white: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_silver_white.jpg?v=1234567890",
+                blue: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_silver_blue.jpg?v=1234567890",
+                gold: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_silver_gold.jpg?v=1234567890"
+            },
+            titan_gray: {
+                black: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_gray_black.jpg?v=1234567890",
+                white: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_gray_white.jpg?v=1234567890",
+                blue: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_gray_blue.jpg?v=1234567890",
+                gold: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_gray_gold.jpg?v=1234567890"
+            },
+            aurora_blue: {
+                black: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_blue_black.jpg?v=1234567890",
+                white: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_blue_white.jpg?v=1234567890",
+                blue: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_blue_blue.jpg?v=1234567890",
+                gold: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_blue_gold.jpg?v=1234567890"
+            },
+            mirror_polish_gold: {
+                black: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_gold_black.jpg?v=1234567890",
+                white: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_gold_white.jpg?v=1234567890",
+                blue: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_gold_blue.jpg?v=1234567890",
+                gold: "https://cdn.shopify.com/s/files/1/0013/6130/2973/files/arc_pulse_gold_gold.jpg?v=1234567890"
+            }
+        };
+
+        function updateImage() {
+            const productColor = productColorSelect.value;
+            const phoneColor = phoneColorSelect.value;
+            const imageUrl = imageUrls[productColor][phoneColor];
+            productImage.src = imageUrl;
+        }
+
+        productColorSelect.addEventListener('change', updateImage);
+        phoneColorSelect.addEventListener('change', updateImage);
+    </script>
+</body>
+</html>
