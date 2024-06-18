@@ -12,40 +12,91 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             margin: 0;
             padding: 20px;
+            min-height: 100vh;
         }
 
         h1 {
             font-size: 2em;
             margin-bottom: 20px;
+            text-align: center;
         }
 
         label {
             font-size: 1.2em;
             margin: 10px 0;
+            text-align: center;
         }
 
         select {
             font-size: 1em;
-            padding: 5px;
+            padding: 10px;
             margin-bottom: 20px;
             border-radius: 5px;
             border: 1px solid #ccc;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
         }
 
         #product-image {
-            width: 300px;
-            height: 300px;
+            width: 100%;
+            max-width: 300px;
+            height: auto;
             border: 1px solid #ddd;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
         }
 
         .selector-container {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+        }
+
+        .button-container {
+            margin-top: 20px;
+        }
+
+        .button-container a {
+            display: inline-block;
+            text-decoration: none;
+            color: white;
+            background-color: #007BFF;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .button-container a:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            label {
+                font-size: 1em;
+            }
+
+            select {
+                font-size: 1em;
+                padding: 8px;
+            }
+
+            .button-container a {
+                padding: 10px;
+                font-size: 0.9em;
+            }
         }
     </style>
 </head>
@@ -72,11 +123,10 @@
         <img id="product-image" src="https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-Aluminum.png?v=1699881973" alt="Product Image">
     </div>
 
-    <!-- 판매페이지로 이동 버튼 추가 -->
     <div class="button-container">
-        <a href="https://smartstore.naver.com/d2cstore/products/10464300970" target="_blank">판매페이지로 이동</a>
+        <a href="https://arc.cc/en-kr/products/arc-pulse-for-iphone-15-pro?variant=47058166645075">판매페이지로 이동</a>
     </div>
-    
+
     <script>
         const productColorSelect = document.getElementById('product-color');
         const phoneColorSelect = document.getElementById('phone-color');
