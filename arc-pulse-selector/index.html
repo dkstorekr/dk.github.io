@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arc Pulse Image Selector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        select {
+            font-size: 1em;
+            padding: 5px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        #product-image {
+            width: 300px;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .selector-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Choose Your Arc Pulse</h1>
+    <div class="selector-container">
+        <label for="product-color">Product Color:</label>
+        <select id="product-color">
+            <option value="matte_black">Matte Black</option>
+            <option value="mirror_polish_silver">Mirror Polish Silver</option>
+            <option value="titan_gray">Titan Gray</option>
+            <option value="aurora_blue">Aurora Blue</option>
+            <option value="mirror_polish_gold">Mirror Polish Gold</option>
+        </select>
+
+        <label for="phone-color">Phone Color:</label>
+        <select id="phone-color">
+            <option value="black">Black Titanium</option>
+            <option value="natural">Natural Titanium</option>
+            <option value="blue">Blue Titanium</option>
+            <option value="white">White Titanium</option>
+        </select>
+
+        <img id="product-image" src="https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-Aluminum.png?v=1694785422" alt="Product Image">
+    </div>
+
+    <script>
+        const productColorSelect = document.getElementById('product-color');
+        const phoneColorSelect = document.getElementById('phone-color');
+        const productImage = document.getElementById('product-image');
+
+        const imageUrls = {
+            matte_black: {
+                black: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-Aluminum.png?v=1699881973",
+                natural: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-Aluminum.png?v=1694785422",
+                blue: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-Aluminum.png?v=1699881861",
+                white: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-Aluminum.png?v=1699882058"
+            },
+            mirror_polish_silver: {
+                black: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-AluminumMirrorPolishSilver.png?v=1699882058",
+                natural: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-AluminumMirrorPolishSilver.png?v=1694785422",
+                blue: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-AluminumMirrorPolishSilver.png?v=1699881861",
+                white: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-AluminumMirrorPolishSilver.png?v=1699882058"
+            },
+            titan_gray: {
+                black: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-AluminumTitanGray.png?v=1699882058",
+                natural: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-AluminumTitanGray.png?v=1699881861",
+                blue: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-AluminumTitanGray.png?v=1699881973",
+                white: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-AluminumTitanGray.png?v=1699882058"
+            },
+            aurora_blue: {
+                black: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-AluminumAuroraBlue.png?v=1709031096",
+                natural: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-AluminumAuroraBlue.png?v=1709031097",
+                blue: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-AluminumAuroraBlue.png?v=1709031096",
+                white: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-AluminumAuroraBlue.png?v=1709031094"
+            },
+            mirror_polish_gold: {
+                black: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-AluminumMirrorPolishGold.png?v=1699882058",
+                natural: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-AluminumMirrorPolishGold.png?v=1699881861",
+                blue: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-AluminumMirrorPolishGold.png?v=1699881973",
+                white: "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-AluminumMirrorPolishGold.png?v=1699882058"
+            }
+        };
+
+        function updateImage() {
+            const productColor = productColorSelect.value;
+            const phoneColor = phoneColorSelect.value;
+            const imageUrl = imageUrls[productColor][phoneColor];
+            productImage.src = imageUrl;
+        }
+
+        productColorSelect.addEventListener('change', updateImage);
+        phoneColorSelect.addEventListener('change', updateImage);
+    </script>
+</body>
+</html>
