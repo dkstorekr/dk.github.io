@@ -78,8 +78,9 @@
     <!-- Dropdowns -->
     <select id="iphone-model" class="dropdown">
         <option value="">Select iPhone Model</option>
-        <option value="15_series">iPhone 15 Pro / 15 Pro Max</option>
+        <option value="17_series">iPhone 17 Pro / 17 Pro Max</option>
         <option value="16_series">iPhone 16 Pro / 16 Pro Max</option>
+        <option value="15_series">iPhone 15 Pro / 15 Pro Max</option>
     </select>
 
     <select id="iphone-color" class="dropdown" style="display:none;"></select>
@@ -89,7 +90,7 @@
     <img id="product-image" src="" alt="ArcPulse Image" style="display:none;" onclick="openImageInNewTab()">
 
     <div class="footer">
-        Powered by <a href="https://smartstore.naver.com/d2cstore/products/10464300970" target="_blank">DKSTORE</a> 2024
+        Powered by <a href="https://smartstore.naver.com/d2cstore/products/10464300970" target="_blank">DKSTORE</a> 2025
     </div>
 
     <script>
@@ -104,12 +105,14 @@
 
         const iphoneColors = {
             "15_series": ["Black Titanium", "White Titanium", "Blue Titanium", "Natural Titanium"],
-            "16_series": ["Black Titanium", "White Titanium", "Natural Titanium", "Desert Titanium"]
+            "16_series": ["Black Titanium", "White Titanium", "Natural Titanium", "Desert Titanium"],
+            "17_series": ["White", "Cosmic Orange", "Deep Blue"]
         };
 
         const arcColors = {
             "15_series": ["Matte Black", "Mirror Silver", "Titan Gray", "Aurora Blue", "Mirror Gold"],
-            "16_series": ["Matte Black", "Mirror Silver", "Graphite", "Rose Bronze", "Black Onyx"]
+            "16_series": ["Matte Black", "Mirror Silver", "Graphite", "Rose Bronze", "Black Onyx"],
+            "17_series": ["Matte Black", "Mirror Silver", "Graphite", "Rose Bronze", "Mirror Gold", "Black Onyx"]
         };
 
         const imageUrls = {
@@ -173,6 +176,32 @@
             "black_onyx": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Desert-OnyxBlack.png?v=1726584163&width=600"
         }
     }
+            "17_series": {
+        "White": {
+            "matte_black": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-MatteBlack.webp?v=1757509177&width=600",
+            "mirror_silver": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Silver.webp?v=1757509177&width=600",
+            "graphite": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Graphite.webp?v=1757509177&width=600",
+            "rose_bronze": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-RoseBronze.webp?v=1757509177&width=600",
+            "mirror_gold": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Gold.webp?v=1757509177&width=600"
+            "black_onyx": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-OnyxBlack.webp?v=1757509177&width=600"
+        },
+        "Cosmic Orange": {
+            "matte_black": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-MatteBlack.webp?v=1757509177&width=600",
+            "mirror_silver": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Silver.webp?v=1757509177&width=600",
+            "graphite": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Graphite.webp?v=1757509177&width=600",
+            "rose_bronze": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-RoseBronze.webp?v=1757509177&width=600",
+            "mirror_gold": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Gold.webp?v=1757509177&width=600"
+            "black_onyx": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-OnyxBlack.webp?v=1757509177&width=600"
+        },
+        "Deep Blue": {
+            "matte_black": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-MatteBlack.webp?v=1757509177&width=600",
+            "mirror_silver": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Silver.webp?v=1757509177&width=600",
+            "graphite": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Graphite.webp?v=1757509177&width=600",
+            "rose_bronze": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-RoseBronze.webp?v=1757509177&width=600",
+            "mirror_gold": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Gold.webp?v=1757509177&width=600"
+            "black_onyx": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-OnyxBlack.webp?v=1757509177&width=600"
+        },
+    },
 };
  // 이미지 사전 로드
         const preloadedImages = [];
