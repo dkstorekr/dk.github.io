@@ -1,308 +1,402 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArcPulse Simulator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f5f5f5;
-        }
-        h1 {
-            margin-bottom: 20px;
-            color: #333;
-            text-align: center;
-        }
-        .dropdown {
-            margin: 10px 0;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 100%;
-            max-width: 300px;
-            -webkit-tap-highlight-color: transparent; /* iOS 탭 하이라이트 제거 */
-            touch-action: manipulation;               /* 탭 지연 최소화 */
-            background: #fff;
-            position: relative;
-            z-index: 10;
-        }
-        img {
-            display: block;
-            max-width: 100%;
-            height: auto;
-            margin: 20px 0;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-        }
-        .progress-bar {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 300px;
-            margin-bottom: 20px;
-            pointer-events: none; /* ✅ 장식 요소가 첫 탭을 가로채지 않도록 */
-        }
-        .progress-step {
-            flex: 1;
-            height: 5px;
-            background-color: #ccc;
-            margin: 0 2px;
-            border-radius: 5px;
-        }
-        .progress-step.active {
-            background-color: #007AFF;
-        }
-        .footer {
-            margin-top: 20px;
-            color: #555;
-            font-size: 14px;
-        }
-        .footer a {
-            color: #007AFF;
-            text-decoration: none;
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ArcPulse Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin:0; padding:20px;
+      display:flex; flex-direction:column; align-items:center;
+      background:#f5f5f5;
+    }
+    h1 { margin-bottom:20px; color:#333; text-align:center; }
+
+    .dropdown {
+      margin:10px 0; padding:10px; font-size:16px;
+      border:1px solid #ccc; border-radius:5px;
+      width:100%; max-width:300px; background:#fff;
+    }
+
+    img {
+      display:block; max-width:100%; height:auto;
+      margin:20px 0; border-radius:10px;
+      box-shadow:0 4px 8px rgba(0,0,0,.2);
+      cursor:pointer;
+    }
+
+    .progress-bar {
+      display:flex; justify-content:space-between;
+      width:100%; max-width:300px; margin-bottom:20px;
+      pointer-events:none; /* 장식 요소 클릭 가로채기 방지 */
+    }
+    .progress-step { flex:1; height:5px; background:#ccc; margin:0 2px; border-radius:5px; }
+    .progress-step.active { background:#007AFF; }
+
+    .footer { margin-top:20px; color:#555; font-size:14px; }
+    .footer a { color:#007AFF; text-decoration:none; }
+
+    /* ===== iOS/노션용 커스텀 드롭다운 ===== */
+    .fake-select {
+      margin:10px 0; padding:10px; font-size:16px;
+      border:1px solid #ccc; border-radius:5px;
+      width:100%; max-width:300px; background:#fff;
+      display:none; /* 기본은 감춤(필요 시에만 표시) */
+      position:relative; z-index:10; cursor:pointer;
+      user-select:none;
+    }
+    .fake-select.disabled { opacity:.6; pointer-events:none; }
+    .fake-select .label {
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .fake-select .label .text { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .fake-select .label .chev { margin-left:8px; }
+
+    .fake-menu {
+      position:fixed; /* 상위 transform/overflow 영향 탈출 */
+      top:0; left:0; right:0; bottom:0;
+      display:none;
+      z-index:9999;
+    }
+    .fake-menu.open { display:block; }
+    .fake-menu .backdrop {
+      position:absolute; inset:0; background:rgba(0,0,0,.25);
+    }
+    .fake-menu .panel {
+      position:absolute; left:50%; transform:translateX(-50%);
+      top:20vh; width:min(90vw, 320px);
+      background:#fff; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.3);
+      max-height:60vh; overflow:auto;
+    }
+    .fake-menu .item {
+      padding:12px 14px; border-bottom:1px solid #eee; cursor:pointer;
+      font-size:16px;
+    }
+    .fake-menu .item:last-child { border-bottom:none; }
+    .fake-menu .item:hover { background:#f6f6f6; }
+    .fake-menu .item.active { background:#e8f0ff; }
+
+    /* 드롭다운 숨김 토글과의 일관성 */
+    .hidden { display:none !important; }
+  </style>
 </head>
 <body>
-    <h1>ArcPulse Simulator</h1>
+  <h1>ArcPulse Simulator</h1>
 
-    <!-- Progress Bar -->
-    <div class="progress-bar">
-        <div id="step1" class="progress-step active"></div>
-        <div id="step2" class="progress-step"></div>
-        <div id="step3" class="progress-step"></div>
+  <!-- Progress Bar -->
+  <div class="progress-bar">
+    <div id="step1" class="progress-step active"></div>
+    <div id="step2" class="progress-step"></div>
+    <div id="step3" class="progress-step"></div>
+  </div>
+
+  <!-- Native selects (기본) -->
+  <select id="iphone-model" class="dropdown">
+    <option value="">Select iPhone Model</option>
+    <option value="17_series">iPhone 17 Pro / 17 Pro Max</option>
+    <option value="16_series">iPhone 16 Pro / 16 Pro Max</option>
+    <option value="15_series">iPhone 15 Pro / 15 Pro Max</option>
+  </select>
+  <select id="iphone-color" class="dropdown" style="display:none;"></select>
+  <select id="arc-color" class="dropdown" style="display:none;"></select>
+
+  <!-- Custom selects (iOS/노션에서만 표시) -->
+  <div id="fs-model" class="fake-select" aria-haspopup="listbox" aria-expanded="false">
+    <div class="label"><span class="text">Select iPhone Model</span><span class="chev">▾</span></div>
+  </div>
+  <div id="fs-color" class="fake-select hidden" aria-haspopup="listbox" aria-expanded="false">
+    <div class="label"><span class="text">Select iPhone Color</span><span class="chev">▾</span></div>
+  </div>
+  <div id="fs-arc" class="fake-select hidden" aria-haspopup="listbox" aria-expanded="false">
+    <div class="label"><span class="text">Select ArcPulse Color</span><span class="chev">▾</span></div>
+  </div>
+
+  <!-- One global menu reused (portal) -->
+  <div id="fake-menu" class="fake-menu" role="dialog" aria-modal="true">
+    <div class="backdrop"></div>
+    <div class="panel" role="listbox" aria-activedescendant="">
+      <!-- items injected dynamically -->
     </div>
+  </div>
 
-    <!-- Dropdowns -->
-    <select id="iphone-model" class="dropdown">
-        <option value="">Select iPhone Model</option>
-        <option value="17_series">iPhone 17 Pro / 17 Pro Max</option>
-        <option value="16_series">iPhone 16 Pro / 16 Pro Max</option>
-        <option value="15_series">iPhone 15 Pro / 15 Pro Max</option>
-    </select>
+  <!-- Image -->
+  <img id="product-image" src="" alt="ArcPulse Image" style="display:none;" onclick="openImageInNewTab()"/>
 
-    <select id="iphone-color" class="dropdown" style="display:none;"></select>
-    <select id="arc-color" class="dropdown" style="display:none;"></select>
+  <div class="footer">
+    Powered by <a href="https://smartstore.naver.com/d2cstore/category/e7bff70f5f304d21bf7eebac682c87e0?cp=1" target="_blank">DKSTORE</a> 2025
+  </div>
 
-    <!-- Image -->
-    <img id="product-image" src="" alt="ArcPulse Image" style="display:none;" onclick="openImageInNewTab()">
-
-    <div class="footer">
-        Powered by <a href="https://smartstore.naver.com/d2cstore/category/e7bff70f5f304d21bf7eebac682c87e0?cp=1" target="_blank">DKSTORE</a> 2025
-    </div>
-
-    <script>
-        const iphoneModelSelect = document.getElementById('iphone-model');
-        const iphoneColorSelect = document.getElementById('iphone-color');
-        const arcColorSelect = document.getElementById('arc-color');
-        const productImage = document.getElementById('product-image');
-
-        const step1 = document.getElementById('step1');
-        const step2 = document.getElementById('step2');
-        const step3 = document.getElementById('step3');
-
-        const iphoneColors = {
-            "15_series": ["Black Titanium", "White Titanium", "Blue Titanium", "Natural Titanium"],
-            "16_series": ["Black Titanium", "White Titanium", "Natural Titanium", "Desert Titanium"],
-            "17_series": ["White", "Cosmic Orange", "Deep Blue"]
-        };
-
-        const arcColors = {
-            "15_series": ["Matte Black", "Mirror Silver", "Titan Gray", "Aurora Blue", "Mirror Gold"],
-            "16_series": ["Matte Black", "Mirror Silver", "Graphite", "Rose Bronze", "Black Onyx"],
-            "17_series": ["Matte Black", "Mirror Silver", "Graphite", "Rose Bronze", "Mirror Gold", "Black Onyx"]
-        };
-
-        const imageUrls = {
-          "15_series": {
-            "black_titanium": {
-              "matte_black": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-Aluminum.png?v=1699881973&width=600",
-              "mirror_silver": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-AluminumMirrorPolishSilver.png?v=1699882058&width=600",
-              "titan_gray": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-AluminumTitanGray.png?v=1699882058&width=600",
-              "aurora_blue": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-AluminumAuroraBlue.png?v=1709031096&width=600",
-              "mirror_gold": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-AluminumMirrorPolishGold.png?v=1699882058&width=600"
-            },
-            "white_titanium": {
-              "matte_black": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-Aluminum.png?v=1699882058&width=600",
-              "mirror_silver": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-AluminumMirrorPolishSilver.png?v=1699882058&width=600",
-              "titan_gray": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-AluminumTitanGray.png?v=1699882058&width=600",
-              "aurora_blue": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-AluminumAuroraBlue.png?v=1709031094&width=600",
-              "mirror_gold": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-AluminumMirrorPolishGold.png?v=1699882058&width=600"
-            },
-            "blue_titanium": {
-              "matte_black": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-Aluminum.png?v=1699881861&width=600",
-              "mirror_silver": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-AluminumMirrorPolishSilver.png?v=1699881861&width=600",
-              "titan_gray": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-AluminumTitanGray.png?v=1699881973&width=600",
-              "aurora_blue": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-AluminumAuroraBlue.png?v=1709031096&width=600",
-              "mirror_gold": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-AluminumMirrorPolishGold.png?v=1699881973&width=600"
-            },
-            "natural_titanium": {
-              "matte_black": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-Aluminum.png?v=1694785422&width=600",
-              "mirror_silver": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-AluminumMirrorPolishSilver.png?v=1694785422&width=600",
-              "titan_gray": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-AluminumTitanGray.png?v=1699881861&width=600",
-              "aurora_blue": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-AluminumAuroraBlue.png?v=1709031097&width=600",
-              "mirror_gold": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-AluminumMirrorPolishGold.png?v=1699881861&width=600"
-            }
-          },
-          "16_series": {
-            "black_titanium": {
-              "matte_black": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Black-MatteBlack.png?v=1726148610&width=600",
-              "mirror_silver": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Black-Silver.png?v=1726147789&width=600",
-              "graphite": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Black-Graphite.png?v=1726148768&width=600",
-              "rose_bronze": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Black-RoseBronze.png?v=1726148287&width=600",
-              "black_onyx": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Black-OnyxBlack.png?v=1726148444&width=600"
-            },
-            "white_titanium": {
-              "matte_black": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-White-MatteBlack.png?v=1726148591&width=600",
-              "mirror_silver": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-White-Silver.png?v=1726147805&width=600",
-              "graphite": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-White-Graphite.png?v=1726148752&width=600",
-              "rose_bronze": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-White-RoseBronze.png?v=1726148326&width=600",
-              "black_onyx": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-White-OnyxBlack.png?v=1726148424&width=600"
-            },
-            "natural_titanium": {
-              "matte_black": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Natural-MatteBlack.png?v=1726583890&width=600",
-              "mirror_silver": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Natural-Silver.png?v=1726583779&width=600",
-              "graphite": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Natural-Graphite.png?v=1726583924&width=600",
-              "rose_bronze": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Natural-RoseBronze.png?v=1726583827&width=600",
-              "black_onyx": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Natural-OnyxBlack.png?v=1726583859&width=600"
-            },
-            "desert_titanium": {
-              "matte_black": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Desert-MatteBlack.png?v=1726584208&width=600",
-              "mirror_silver": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Desert-Silver.png?v=1726584025&width=600",
-              "graphite": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Desert-Graphite.png?v=1726584260&width=600",
-              "rose_bronze": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Desert-RoseBronze.png?v=1726584111&width=600",
-              "black_onyx": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Desert-OnyxBlack.png?v=1726584163&width=600"
-            }
-          },
-          "17_series": {
-            "white": {
-              "matte_black": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-MatteBlack.webp?v=1757509177&width=600",
-              "mirror_silver": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Silver.webp?v=1757509177&width=600",
-              "graphite": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Graphite.webp?v=1757509177&width=600",
-              "rose_bronze": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-RoseBronze.webp?v=1757509177&width=600",
-              "mirror_gold": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Gold.webp?v=1757509177&width=600",
-              "black_onyx": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-OnyxBlack.webp?v=1757509177&width=600"
-            },
-            "cosmic_orange": {
-              "matte_black": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Orange17-MatteBlack.webp?v=1757509177&width=600",
-              "mirror_silver": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Orange17-Silver.webp?v=1757509177&width=600",
-              "graphite": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Orange17-Graphite.webp?v=1757509177&width=600",
-              "rose_bronze": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Orange17-RoseBronze.webp?v=1757509177&width=600",
-              "mirror_gold": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Orange17-Gold.webp?v=1757509177&width=600",
-              "black_onyx": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Orange17-OnyxBlack.webp?v=1757509177&width=600"
-            },
-            "deep_blue": {
-              "matte_black": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Blue17-MatteBlack.webp?v=1757509177&width=600",
-              "mirror_silver": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Blue17-Silver.webp?v=1757509177&width=600",
-              "graphite": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Blue17-Graphite.webp?v=1757509177&width=600",
-              "rose_bronze": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Blue17-RoseBronze.webp?v=1757509177&width=600",
-              "mirror_gold": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Blue17-Gold.webp?v=1757509177&width=600",
-              "black_onyx": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Blue17-OnyxBlack.webp?v=1757509177&width=600"
-            }
-          }
-        };
-
-        // ====== 기존 동작 그대로 ======
-        iphoneModelSelect.addEventListener('change', () => {
-            step2.classList.add('active');
-            iphoneColorSelect.style.display = 'block';
-            iphoneColorSelect.innerHTML = '<option value="">Select iPhone Color</option>';
-            iphoneColors[iphoneModelSelect.value]?.forEach(color => {
-                const option = document.createElement('option');
-                option.value = color.toLowerCase().replace(/\s/g, "_");
-                option.textContent = color;
-                iphoneColorSelect.appendChild(option);
-            });
-            arcColorSelect.style.display = 'none';
-            productImage.style.display = 'none';
-            step3.classList.remove('active');
-        });
-
-        iphoneColorSelect.addEventListener('change', () => {
-            step3.classList.add('active');
-            arcColorSelect.style.display = 'block';
-            arcColorSelect.innerHTML = '<option value="">Select ArcPulse Color</option>';
-            arcColors[iphoneModelSelect.value]?.forEach(color => {
-                const option = document.createElement('option');
-                option.value = color.toLowerCase().replace(/\s/g, "_");
-                option.textContent = color;
-                arcColorSelect.appendChild(option);
-            });
-            productImage.style.display = 'none';
-        });
-
-        arcColorSelect.addEventListener('change', () => {
-            const model = iphoneModelSelect.value;
-            const iphoneColor = iphoneColorSelect.value;
-            const arcColor = arcColorSelect.value;
-            const imageUrl = imageUrls[model]?.[iphoneColor]?.[arcColor];
-
-            if (imageUrl) {
-                productImage.src = imageUrl;
-                productImage.style.display = 'block';
-            } else {
-                productImage.style.display = 'none';
-            }
-        });
-
-        function openImageInNewTab() {
-            if (productImage.src) {
-                window.open(productImage.src, '_blank');
-            }
+  <script>
+    // ===== Data =====
+    const iphoneColors = {
+      "15_series": ["Black Titanium", "White Titanium", "Blue Titanium", "Natural Titanium"],
+      "16_series": ["Black Titanium", "White Titanium", "Natural Titanium", "Desert Titanium"],
+      "17_series": ["White", "Cosmic Orange", "Deep Blue"]
+    };
+    const arcColors = {
+      "15_series": ["Matte Black", "Mirror Silver", "Titan Gray", "Aurora Blue", "Mirror Gold"],
+      "16_series": ["Matte Black", "Mirror Silver", "Graphite", "Rose Bronze", "Black Onyx"],
+      "17_series": ["Matte Black", "Mirror Silver", "Graphite", "Rose Bronze", "Mirror Gold", "Black Onyx"]
+    };
+    const imageUrls = {
+      "15_series": {
+        "black_titanium": {
+          "matte_black": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-Aluminum.png?v=1699881973&width=600",
+          "mirror_silver": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-AluminumMirrorPolishSilver.png?v=1699882058&width=600",
+          "titan_gray": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-AluminumTitanGray.png?v=1699882058&width=600",
+          "aurora_blue": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-AluminumAuroraBlue.png?v=1709031096&width=600",
+          "mirror_gold": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Black-AluminumMirrorPolishGold.png?v=1699882058&width=600"
+        },
+        "white_titanium": {
+          "matte_black": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-Aluminum.png?v=1699882058&width=600",
+          "mirror_silver": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-AluminumMirrorPolishSilver.png?v=1699882058&width=600",
+          "titan_gray": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-AluminumTitanGray.png?v=1699882058&width=600",
+          "aurora_blue": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-AluminumAuroraBlue.png?v=1709031094&width=600",
+          "mirror_gold": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Silver-AluminumMirrorPolishGold.png?v=1699882058&width=600"
+        },
+        "blue_titanium": {
+          "matte_black": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-Aluminum.png?v=1699881861&width=600",
+          "mirror_silver": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-AluminumMirrorPolishSilver.png?v=1699881861&width=600",
+          "titan_gray": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-AluminumTitanGray.png?v=1699881973&width=600",
+          "aurora_blue": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-AluminumAuroraBlue.png?v=1709031096&width=600",
+          "mirror_gold": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-DarkBlue-AluminumMirrorPolishGold.png?v=1699881973&width=600"
+        },
+        "natural_titanium": {
+          "matte_black": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-Aluminum.png?v=1694785422&width=600",
+          "mirror_silver": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-AluminumMirrorPolishSilver.png?v=1694785422&width=600",
+          "titan_gray": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-AluminumTitanGray.png?v=1699881861&width=600",
+          "aurora_blue": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-AluminumAuroraBlue.png?v=1709031097&width=600",
+          "mirror_gold": "https://arc.cc/cdn/shop/files/ArcPulseForIPhone15Pro-Gray-AluminumMirrorPolishGold.png?v=1699881861&width=600"
         }
-
-        // ====== ✅ iOS Safari 전용: '가벼운 탭' 시 즉시 닫힘 방지 최소 패치 ======
-        const isIOS = /iP(ad|hone|od)/.test(navigator.platform) ||
-                      (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
-
-        function attachIOSOneTapFix(selectEl){
-          if (!isIOS || !selectEl) return;
-
-          // 캡처 단계에서 touchend를 선점하여 기본(=뒤이어 오는 click) 차단
-          selectEl.addEventListener('touchend', (e) => {
-            // 이미 피커가 뜬 상태에서 이어지는 기본 이벤트가 즉시 닫음을 유발 → 차단
-            e.preventDefault();
-            e.stopPropagation();
-
-            // 잠깐 투명 실드로 추가 탭/스크롤을 흡수(연속 이벤트로 인한 즉시 블러 방지)
-            const shield = document.createElement('div');
-            shield.style.cssText = `
-              position: fixed; inset: 0; background: transparent; z-index: 9999;
-              touch-action: none; -webkit-tap-highlight-color: transparent;
-            `;
-            document.body.appendChild(shield);
-
-            // 다음 틱에 안전하게 피커 오픈
-            requestAnimationFrame(() => {
-              try {
-                if (typeof selectEl.showPicker === 'function') {
-                  selectEl.showPicker();
-                } else {
-                  // 구형 폴백(있어도 안 쓰일 가능성 높음)
-                  selectEl.focus();
-                  selectEl.click();
-                }
-              } finally {
-                // 300ms 후 실드 제거(이중 탭/스크롤 안정화 시간)
-                setTimeout(() => {
-                  if (shield.parentNode) shield.parentNode.removeChild(shield);
-                }, 300);
-              }
-            });
-          }, { passive: false, capture: true });
+      },
+      "16_series": {
+        "black_titanium": {
+          "matte_black": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Black-MatteBlack.png?v=1726148610&width=600",
+          "mirror_silver": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Black-Silver.png?v=1726147789&width=600",
+          "graphite": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Black-Graphite.png?v=1726148768&width=600",
+          "rose_bronze": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Black-RoseBronze.png?v=1726148287&width=600",
+          "black_onyx": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Black-OnyxBlack.png?v=1726148444&width=600"
+        },
+        "white_titanium": {
+          "matte_black": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-White-MatteBlack.png?v=1726148591&width=600",
+          "mirror_silver": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-White-Silver.png?v=1726147805&width=600",
+          "graphite": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-White-Graphite.png?v=1726148752&width=600",
+          "rose_bronze": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-White-RoseBronze.png?v=1726148326&width=600",
+          "black_onyx": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-White-OnyxBlack.png?v=1726148424&width=600"
+        },
+        "natural_titanium": {
+          "matte_black": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Natural-MatteBlack.png?v=1726583890&width=600",
+          "mirror_silver": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Natural-Silver.png?v=1726583779&width=600",
+          "graphite": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Natural-Graphite.png?v=1726583924&width=600",
+          "rose_bronze": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Natural-RoseBronze.png?v=1726583827&width=600",
+          "black_onyx": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Natural-OnyxBlack.png?v=1726583859&width=600"
+        },
+        "desert_titanium": {
+          "matte_black": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Desert-MatteBlack.png?v=1726584208&width=600",
+          "mirror_silver": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Desert-Silver.png?v=1726584025&width=600",
+          "graphite": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Desert-Graphite.png?v=1726584260&width=600",
+          "rose_bronze": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Desert-RoseBronze.png?v=1726584111&width=600",
+          "black_onyx": "https://arc.cc/cdn/shop/files/AP16_Pro_ProMax-Desert-OnyxBlack.png?v=1726584163&width=600"
         }
+      },
+      "17_series": {
+        "white": {
+          "matte_black": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-MatteBlack.webp?v=1757509177&width=600",
+          "mirror_silver": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Silver.webp?v=1757509177&width=600",
+          "graphite": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Graphite.webp?v=1757509177&width=600",
+          "rose_bronze": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-RoseBronze.webp?v=1757509177&width=600",
+          "mirror_gold": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-Gold.webp?v=1757509177&width=600",
+          "black_onyx": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-White17-OnyxBlack.webp?v=1757509177&width=600"
+        },
+        "cosmic_orange": {
+          "matte_black": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Orange17-MatteBlack.webp?v=1757509177&width=600",
+          "mirror_silver": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Orange17-Silver.webp?v=1757509177&width=600",
+          "graphite": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Orange17-Graphite.webp?v=1757509177&width=600",
+          "rose_bronze": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Orange17-RoseBronze.webp?v=1757509177&width=600",
+          "mirror_gold": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Orange17-Gold.webp?v=1757509177&width=600",
+          "black_onyx": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Orange17-OnyxBlack.webp?v=1757509177&width=600"
+        },
+        "deep_blue": {
+          "matte_black": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Blue17-MatteBlack.webp?v=1757509177&width=600",
+          "mirror_silver": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Blue17-Silver.webp?v=1757509177&width=600",
+          "graphite": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Blue17-Graphite.webp?v=1757509177&width=600",
+          "rose_bronze": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Blue17-RoseBronze.webp?v=1757509177&width=600",
+          "mirror_gold": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Blue17-Gold.webp?v=1757509177&width=600",
+          "black_onyx": "https://arc.cc/cdn/shop/files/AP17_Pro_ProMax-Blue17-OnyxBlack.webp?v=1757509177&width=600"
+        }
+      }
+    };
 
-        attachIOSOneTapFix(iphoneModelSelect);
-        attachIOSOneTapFix(iphoneColorSelect);
-        attachIOSOneTapFix(arcColorSelect);
-    </script>
+    // ===== Helpers =====
+    function openImageInNewTab(){ if (productImage.src) window.open(productImage.src, '_blank'); }
+    window.openImageInNewTab = openImageInNewTab;
+
+    function isIOS(){ return /iP(ad|hone|od)/.test(navigator.platform) || (navigator.userAgent.includes('Mac') && 'ontouchend' in document); }
+    function inIframe(){ try { return window.self !== window.top; } catch(_e){ return true; } }
+    function isNotionEmbed(){ return document.referrer.includes('notion.so') || document.referrer.includes('notion.site'); }
+
+    // ===== Native <select> wiring (원본 그대로) =====
+    const iphoneModelSelect = document.getElementById('iphone-model');
+    const iphoneColorSelect = document.getElementById('iphone-color');
+    const arcColorSelect   = document.getElementById('arc-color');
+    const productImage     = document.getElementById('product-image');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+
+    iphoneModelSelect.addEventListener('change', () => {
+      step2.classList.add('active');
+      iphoneColorSelect.style.display = 'block';
+      iphoneColorSelect.innerHTML = '<option value="">Select iPhone Color</option>';
+      (iphoneColors[iphoneModelSelect.value] || []).forEach(color => {
+        const option = document.createElement('option');
+        option.value = color.toLowerCase().replace(/\s/g, "_");
+        option.textContent = color;
+        iphoneColorSelect.appendChild(option);
+      });
+      arcColorSelect.style.display = 'none';
+      productImage.style.display = 'none';
+      step3.classList.remove('active');
+    });
+
+    iphoneColorSelect.addEventListener('change', () => {
+      step3.classList.add('active');
+      arcColorSelect.style.display = 'block';
+      arcColorSelect.innerHTML = '<option value="">Select ArcPulse Color</option>';
+      (arcColors[iphoneModelSelect.value] || []).forEach(color => {
+        const option = document.createElement('option');
+        option.value = color.toLowerCase().replace(/\s/g, "_");
+        option.textContent = color;
+        arcColorSelect.appendChild(option);
+      });
+      productImage.style.display = 'none';
+    });
+
+    arcColorSelect.addEventListener('change', () => {
+      const model = iphoneModelSelect.value;
+      const iphoneColor = iphoneColorSelect.value;
+      const arcColor = arcColorSelect.value;
+      const url = imageUrls[model]?.[iphoneColor]?.[arcColor];
+      if (url){ productImage.src = url; productImage.style.display = 'block'; }
+      else { productImage.style.display = 'none'; }
+    });
+
+    // ===== Custom dropdown (iOS + Notion/iFrame 전용) =====
+    const fsModel = document.getElementById('fs-model');
+    const fsColor = document.getElementById('fs-color');
+    const fsArc   = document.getElementById('fs-arc');
+    const fakeMenu = document.getElementById('fake-menu');
+    const panel = fakeMenu.querySelector('.panel');
+    const backdrop = fakeMenu.querySelector('.backdrop');
+
+    function showMenuFor(targetEl, options, currentValue, onSelect){
+      // build items
+      panel.innerHTML = '';
+      options.forEach(opt => {
+        const id = opt.value ?? opt;
+        const label = opt.label ?? opt;
+        const div = document.createElement('div');
+        div.className = 'item' + ((id === currentValue) ? ' active' : '');
+        div.setAttribute('role', 'option');
+        div.dataset.value = id;
+        div.textContent = label;
+        div.addEventListener('click', () => {
+          onSelect(id, label);
+          closeMenu();
+        });
+        panel.appendChild(div);
+      });
+
+      // open
+      fakeMenu.classList.add('open');
+      targetEl.setAttribute('aria-expanded', 'true');
+
+      // close handlers
+      function onEsc(e){ if (e.key === 'Escape') closeMenu(); }
+      function closeMenu(){
+        fakeMenu.classList.remove('open');
+        targetEl.setAttribute('aria-expanded', 'false');
+        document.removeEventListener('keydown', onEsc, true);
+      }
+      backdrop.onclick = closeMenu;
+      document.addEventListener('keydown', onEsc, true);
+    }
+
+    function setFakeText(el, text){ el.querySelector('.text').textContent = text; }
+
+    function toKey(s){ return (s || '').toLowerCase().replace(/\s/g, '_'); }
+
+    function wireModel(){
+      const opts = [
+        { value:'17_series', label:'iPhone 17 Pro / 17 Pro Max' },
+        { value:'16_series', label:'iPhone 16 Pro / 16 Pro Max' },
+        { value:'15_series', label:'iPhone 15 Pro / 15 Pro Max' }
+      ];
+      fsModel.onclick = () => {
+        showMenuFor(fsModel, opts, iphoneModelSelect.value, (val, label) => {
+          // sync native
+          iphoneModelSelect.value = val;
+          iphoneModelSelect.dispatchEvent(new Event('change', { bubbles:true }));
+          // sync fake
+          setFakeText(fsModel, label);
+          fsColor.classList.remove('hidden'); setFakeText(fsColor, 'Select iPhone Color');
+          fsArc.classList.add('hidden'); setFakeText(fsArc, 'Select ArcPulse Color');
+        });
+      };
+    }
+
+    function wireColor(){
+      fsColor.onclick = () => {
+        const series = iphoneModelSelect.value;
+        const list = (iphoneColors[series] || []).map(c => ({ value: toKey(c), label:c }));
+        showMenuFor(fsColor, list, iphoneColorSelect.value, (val, label) => {
+          // sync native
+          iphoneColorSelect.style.display = 'block';
+          iphoneColorSelect.value = val;
+          iphoneColorSelect.dispatchEvent(new Event('change', { bubbles:true }));
+          // sync fake
+          setFakeText(fsColor, label);
+          fsArc.classList.remove('hidden'); setFakeText(fsArc, 'Select ArcPulse Color');
+        });
+      };
+    }
+
+    function wireArc(){
+      fsArc.onclick = () => {
+        const series = iphoneModelSelect.value;
+        const list = (arcColors[series] || []).map(c => ({ value: toKey(c), label:c }));
+        showMenuFor(fsArc, list, arcColorSelect.value, (val, label) => {
+          // sync native
+          arcColorSelect.style.display = 'block';
+          arcColorSelect.value = val;
+          arcColorSelect.dispatchEvent(new Event('change', { bubbles:true }));
+          // sync fake
+          setFakeText(fsArc, label);
+        });
+      };
+    }
+
+    // 활성화 조건: iOS && (노션 임베드 || iFrame)
+    const useCustom = isIOS() && (isNotionEmbed() || inIframe());
+
+    if (useCustom){
+      // 네이티브 select는 화면에서 숨김(로직은 그대로 활용)
+      document.getElementById('iphone-model').classList.add('hidden');
+      document.getElementById('iphone-color').classList.add('hidden');
+      document.getElementById('arc-color').classList.add('hidden');
+
+      // 커스텀 드롭다운 노출
+      fsModel.style.display = 'block';
+      fsColor.style.display = 'block'; fsColor.classList.add('hidden');
+      fsArc.style.display = 'block';   fsArc.classList.add('hidden');
+
+      wireModel();
+      wireColor();
+      wireArc();
+    } else {
+      // 비 iOS/노션: 기존 네이티브 select 사용 (아무 것도 할 필요 없음)
+    }
+  </script>
 </body>
 </html>
+
